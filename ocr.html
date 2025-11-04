@@ -107,62 +107,95 @@
   </main>
 
   <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-    // ✅ Supabase שלך
-    const supabase = createClient(
-      "https://tgfqsmarvznpzwdixvye.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnZnFzbWFydnpucHp3ZGl4dnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3OTM1NzEsImV4cCI6MjA3NjM2OTU3MX0.ui5rHWh8KgSmhYrl_unozb9rwAaZQeTNEeMZF63lhYM"
-    );
+const supabase = createClient(
+  "https://tgfqsmarvznpzwdixvye.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnZnFzbWFydnpucHp3ZGl4dnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3OTM1NzEsImV4cCI6MjA3NjM2OTU3MX0.ui5rHWh8KgSmhYrl_unozb9rwAaZQeTNEeMZF63lhYM"
+);
 
-    const fileInput = document.getElementById("fileInput");
-    const scanBtn = document.getElementById("scanBtn");
-    const resultDiv = document.getElementById("result");
+const fileInput = document.getElementById("fileInput");
+const scanBtn = document.getElementById("scanBtn");
+const resultDiv = document.getElementById("result");
 
-    scanBtn.addEventListener("click", () => fileInput.click());
+scanBtn.addEventListener("click", () => fileInput.click());
 
-    fileInput.addEventListener("change", async (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
+fileInput.addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
 
-      resultDiv.innerHTML = '<div class="loader"></div><p>מזהה טקסט... אנא המתן ⏳</p>';
+  resultDiv.innerHTML = '<div class="loader"></div><p>מזהה טקסט... אנא המתן ⏳</p>';
 
-      try {
-        // OCR בעברית + אנגלית
-        const { data: { text } } = await Tesseract.recognize(file, 'heb+eng');
-        const cleanText = text.trim();
-
-        if (!cleanText) {
-          resultDiv.textContent = "לא זוהה טקסט 😅";
-          return;
-        }
-
-        // 🔹 ניתוח בסיסי של טקסט לזיהוי סכום ובית עסק
-        const lines = cleanText.split('\n').map(l => l.trim()).filter(Boolean);
-        const storeName = lines[0] || null;
-        const totalMatch = cleanText.match(/([0-9]+[.,]?[0-9]*)\s*(₪|שח|ש״ח)/);
-        const total = totalMatch ? parseFloat(totalMatch[1].replace(',', '.')) : null;
-
-        // 🔹 שמירה ל־Supabase
-        const { error } = await supabase
-          .from("receipts")
-          .insert([{ text: cleanText, store_name: storeName, total }]);
-
-        if (error) throw error;
-
-        resultDiv.innerHTML = `
-          <h3>✅ סריקה נשמרה בהצלחה!</h3>
-          <p><strong>בית עסק:</strong> ${storeName || 'לא זוהה'}<br>
-          <strong>סכום:</strong> ${total ? total + ' ₪' : 'לא זוהה'}<br><br>
-          <pre>${cleanText}</pre>
-        `;
-
-
-      } catch (error) {
-        console.error(error);
-        resultDiv.textContent = "שגיאה בקריאה או בשמירה ❌";
-      }
+  try {
+    // ✅ OCR בעברית בלבד + whitelist
+    const { data: { text } } = await Tesseract.recognize(file, 'heb', {
+      tessedit_char_whitelist: 'אבגדהוזחטיכלמנסעפצקרשת0123456789₪.,:-" ',
+      tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK
     });
-  </script>
+
+    const cleanText = text.trim().replace(/\s{2,}/g, ' ');
+    if (!cleanText) {
+      resultDiv.textContent = "❌ לא זוהה טקסט תקין מהתמונה.";
+      return;
+    }
+
+    // 🔹 ניתוח שורות לאיתור מוצרים ומחירים
+    const lines = cleanText.split('\n').map(l => l.trim()).filter(Boolean);
+    const storeName = lines[0] || 'לא זוהה';
+    const purchases = [];
+
+    for (const line of lines) {
+      const match = line.match(/(.+?)\s+([0-9]+[.,]?[0-9]*)\s*(₪|שח|ש״ח)?$/);
+      if (match) {
+        const product = match[1].trim();
+        const price = parseFloat(match[2].replace(',', '.'));
+        purchases.push({ product_name: product, price });
+      }
+    }
+
+    // סכום כולל
+    const totalMatch = cleanText.match(/([0-9]+[.,]?[0-9]*)\s*(₪|שח|ש״ח)/);
+    const total = totalMatch ? parseFloat(totalMatch[1].replace(',', '.')) : null;
+
+    // ✅ שמירה ל־receipts
+    const { data: receiptData, error: recError } = await supabase
+      .from("receipts")
+      .insert([{ text: cleanText, store_name: storeName, total }])
+      .select("id")
+      .single();
+
+    if (recError) throw recError;
+
+    // ✅ שמירת כל המוצרים לטבלת purchases
+    for (const item of purchases) {
+      await supabase.from("purchases").insert([{
+        receipt_id: receiptData.id,
+        store_name: storeName,
+        product_name: item.product_name,
+        price: item.price
+      }]);
+    }
+
+    // ✅ הצגת התוצאה בדף
+    const itemsHTML = purchases.length
+      ? purchases.map(p => `<li>${p.product_name} — ${p.price} ₪</li>`).join('')
+      : '<li>לא זוהו מוצרים בקבלה</li>';
+
+    resultDiv.innerHTML = `
+      <h3>✅ סריקה בוצעה בהצלחה!</h3>
+      <p><strong>בית עסק:</strong> ${storeName}<br>
+      <strong>סכום כולל:</strong> ${total ? total + ' ₪' : 'לא זוהה'}</p>
+      <h4>מוצרים שזוהו:</h4>
+      <ul style="text-align:right;direction:rtl;">${itemsHTML}</ul>
+      <p style="color:#64748b;font-size:0.9rem;">הנתונים נשמרו ל-Supabase. ניתן לחזור לדף הראשי.</p>
+    `;
+
+  } catch (error) {
+    console.error(error);
+    resultDiv.textContent = "שגיאה בקריאה או בשמירה ❌";
+  }
+});
+</script>
+
 </body>
 </html>
