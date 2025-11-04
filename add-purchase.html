@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🛒 הוספת קנייה</title>
+<style>
+  body {
+    font-family: "Heebo", sans-serif;
+    background: linear-gradient(135deg, #f3f6fb, #eef2ff);
+    color: #1e293b;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  header {
+    background: #ffffff;
+    padding: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+  }
+
+  h2 {
+    margin: 0;
+    color: #1e3a8a;
+    font-weight: 700;
+  }
+
+  main {
+    margin-top: 60px;
+    padding: 20px;
+  }
+
+  form {
+    background: #ffffff;
+    width: 90%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+
+  label {
+    display: block;
+    margin-top: 10px;
+    font-size: 1.05rem;
+    color: #1e3a8a;
+    font-weight: 600;
+  }
+
+  input {
+    width: 80%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    text-align: center;
+    font-size: 1rem;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+  }
+
+  button {
+    margin-top: 20px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+
+  button:hover {
+    background: #1d4ed8;
+    transform: scale(1.05);
+  }
+
+  a {
+    display: inline-block;
+    margin-top: 25px;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+
+  a:hover {
+    color: #1d4ed8;
+  }
+
+  footer {
+    margin-top: 50px;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+
+<body>
+  <header>
+    <h2>🛒 הוספת קנייה חדשה</h2>
+  </header>
+
+  <main>
+    <form id="purchaseForm">
+      <label>שם מוצר:</label>
+      <input id="name" required placeholder="לדוגמה: חלב תנובה"><br><br>
+
+      <label>מחיר (₪):</label>
+      <input id="price" type="number" step="0.01" required placeholder="לדוגמה: 6.90"><br><br>
+
+      <button type="submit">💾 שמור</button>
+    </form>
+
+    <a href="index.html">⬅ חזרה לדף הראשי</a>
+  </main>
+
+  <footer>
+    © המערכת הכלכלית שלי
+  </footer>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    const supabase = createClient(
+      "https://tgfqsmarvznpzwdixvye.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnZnFzbWFydnpucHp3ZGl4dnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3OTM1NzEsImV4cCI6MjA3NjM2OTU3MX0.ui5rHWh8KgSmhYrl_unozb9rwAaZQeTNEeMZF63lhYM"
+    );
+
+    document.getElementById("purchaseForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const price = parseFloat(document.getElementById("price").value);
+      const date = new Date().toISOString();
+
+      const { error } = await supabase.from("purchases").insert([
+        { product_name: name, price, created_at: date }
+      ]);
+
+      if (error) {
+        console.error(error);
+        alert("❌ שגיאה בשמירה!");
+      } else {
+        alert("✅ הקנייה נשמרה בהצלחה!");
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+</body>
+</html>

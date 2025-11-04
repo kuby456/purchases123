@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📷 סריקת קבלה</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    body {
+      font-family: "Heebo", sans-serif;
+      background: linear-gradient(135deg, #f3f6fb, #eef2ff);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      color: #1e293b;
+    }
+
+    header {
+      background: #ffffff;
+      padding: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+    }
+
+    h2 {
+      margin: 0;
+      color: #1e3a8a;
+      font-weight: 700;
+    }
+
+    main {
+      margin-top: 40px;
+      padding: 20px;
+    }
+
+    #scanBtn {
+      background: #2563eb;
+      color: #fff;
+      font-size: 1.1rem;
+      border: none;
+      padding: 14px 26px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    #scanBtn:hover {
+      background: #1d4ed8;
+      transform: scale(1.05);
+    }
+
+    #result {
+      margin-top: 30px;
+      background: #fff;
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      width: 80%;
+      margin-inline: auto;
+      text-align: right;
+      white-space: pre-wrap;
+      direction: rtl;
+      min-height: 120px;
+      line-height: 1.6;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 20px;
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .back-btn:hover {
+      color: #1d4ed8;
+    }
+
+    .loader {
+      margin-top: 20px;
+      border: 5px solid #e0e7ff;
+      border-top: 5px solid #2563eb;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      animation: spin 1s linear infinite;
+      margin-inline: auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>📷 סריקת קבלה</h2>
+  </header>
+
+  <main>
+    <button id="scanBtn">בחר או צלם תמונה</button>
+    <input type="file" id="fileInput" accept="image/*" capture="camera" style="display:none;">
+    <div id="result"></div>
+    <a href="index.html" class="back-btn">⬅ חזרה לדף הראשי</a>
+  </main>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    // ✅ Supabase שלך
+    const supabase = createClient(
+      "https://tgfqsmarvznpzwdixvye.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnZnFzbWFydnpucHp3ZGl4dnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3OTM1NzEsImV4cCI6MjA3NjM2OTU3MX0.ui5rHWh8KgSmhYrl_unozb9rwAaZQeTNEeMZF63lhYM"
+    );
+
+    const fileInput = document.getElementById("fileInput");
+    const scanBtn = document.getElementById("scanBtn");
+    const resultDiv = document.getElementById("result");
+
+    scanBtn.addEventListener("click", () => fileInput.click());
+
+    fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      resultDiv.innerHTML = '<div class="loader"></div><p>מזהה טקסט... אנא המתן ⏳</p>';
+
+      try {
+        // OCR בעברית + אנגלית
+        const { data: { text } } = await Tesseract.recognize(file, 'heb+eng');
+        const cleanText = text.trim();
+
+        if (!cleanText) {
+          resultDiv.textContent = "לא זוהה טקסט 😅";
+          return;
+        }
+
+        // 🔹 ניתוח בסיסי של טקסט לזיהוי סכום ובית עסק
+        const lines = cleanText.split('\n').map(l => l.trim()).filter(Boolean);
+        const storeName = lines[0] || null;
+        const totalMatch = cleanText.match(/([0-9]+[.,]?[0-9]*)\s*(₪|שח|ש״ח)/);
+        const total = totalMatch ? parseFloat(totalMatch[1].replace(',', '.')) : null;
+
+        // 🔹 שמירה ל־Supabase
+        const { error } = await supabase
+          .from("receipts")
+          .insert([{ text: cleanText, store_name: storeName, total }]);
+
+        if (error) throw error;
+
+        resultDiv.innerHTML = `
+          <h3>✅ סריקה נשמרה בהצלחה!</h3>
+          <p><strong>בית עסק:</strong> ${storeName || 'לא זוהה'}<br>
+          <strong>סכום:</strong> ${total ? total + ' ₪' : 'לא זוהה'}<br><br>
+          <pre>${cleanText}</pre>
+        `;
+
+        // מעבר לדף הראשי לאחר כמה שניות
+        setTimeout(() => window.location.href = "index.html", 2500);
+
+      } catch (error) {
+        console.error(error);
+        resultDiv.textContent = "שגיאה בקריאה או בשמירה ❌";
+      }
+    });
+  </script>
+</body>
+</html>

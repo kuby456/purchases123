@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ניהול תקציבים</title>
+  <style>
+    body {
+      font-family: "Heebo", sans-serif;
+      background: linear-gradient(135deg, #f3f6fb, #eef2ff);
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    header {
+      background: #ffffff;
+      padding: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+    }
+
+    h2 {
+      margin: 0;
+      color: #1e3a8a;
+    }
+
+    main {
+      margin-top: 30px;
+      padding: 20px;
+    }
+
+    section {
+      background: #ffffff;
+      width: 90%;
+      max-width: 500px;
+      margin: 20px auto;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      padding: 20px;
+    }
+
+    input, select {
+      width: 80%;
+      padding: 10px;
+      margin: 6px 0;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      margin-top: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+      transform: scale(1.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 8px;
+    }
+
+    th {
+      background: #f1f5ff;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 20px;
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .back-btn:hover {
+      color: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>💰 ניהול תקציבים</h2>
+  </header>
+
+  <main>
+    <section>
+      <h3>➕ הוסף תקציב חדש</h3>
+      <input id="budgetName" placeholder="שם התקציב" />
+      <input id="budgetTotal" type="number" placeholder="סכום כולל (₪)" />
+      <button id="addBudgetBtn">💾 שמור תקציב</button>
+    </section>
+
+    <section>
+      <h3>💸 הוסף קנייה לתקציב</h3>
+      <select id="budgetSelect"></select><br>
+      <input id="productName" placeholder="שם מוצר" />
+      <input id="storeName" placeholder="שם חנות (לא חובה)" />
+      <input id="productPrice" type="number" placeholder="מחיר (₪)" />
+      <button id="addPurchaseBtn">➕ הוסף קנייה</button>
+    </section>
+
+    <section>
+      <h3>📊 רשימת תקציבים</h3>
+      <table id="budgetTable">
+        <tr><th>שם</th><th>סה״כ</th><th>נותר</th></tr>
+      </table>
+    </section>
+
+    <a href="index.html" class="back-btn">⬅ חזרה לדף הראשי</a>
+  </main>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const supabase = createClient(
+      "https://tgfqsmarvznpzwdixvye.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnZnFzbWFydnpucHp3ZGl4dnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3OTM1NzEsImV4cCI6MjA3NjM2OTU3MX0.ui5rHWh8KgSmhYrl_unozb9rwAaZQeTNEeMZF63lhYM"
+    );
+
+    const addBudgetBtn = document.getElementById("addBudgetBtn");
+    const addPurchaseBtn = document.getElementById("addPurchaseBtn");
+    const budgetTable = document.getElementById("budgetTable");
+    const budgetSelect = document.getElementById("budgetSelect");
+
+    async function loadBudgets() {
+      const { data, error } = await supabase.from("budgets").select("*").order("id", { ascending: false });
+      if (error) return console.error(error);
+
+      budgetSelect.innerHTML = "";
+      budgetTable.innerHTML = "<tr><th>שם</th><th>סה״כ</th><th>נותר</th></tr>";
+
+      data.forEach(b => {
+        const opt = document.createElement("option");
+        opt.value = b.id;
+        opt.textContent = `${b.name} (${b.remaining} ₪ נשאר)`;
+        budgetSelect.appendChild(opt);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${b.name}</td><td>${b.total} ₪</td><td>${b.remaining} ₪</td>`;
+        budgetTable.appendChild(tr);
+      });
+    }
+
+    addBudgetBtn.addEventListener("click", async () => {
+      const name = document.getElementById("budgetName").value.trim();
+      const total = parseFloat(document.getElementById("budgetTotal").value);
+      if (!name || !total) return alert("נא למלא שם וסכום.");
+
+      const { error } = await supabase.from("budgets").insert([{ name, total, remaining: total }]);
+      if (error) return alert("שגיאה בשמירת תקציב");
+      alert("✅ תקציב נוסף!");
+      await loadBudgets();
+    });
+
+    addPurchaseBtn.addEventListener("click", async () => {
+      const budget_id = budgetSelect.value;
+      const product_name = document.getElementById("productName").value.trim();
+      const store_name = document.getElementById("storeName").value.trim();
+      const price = parseFloat(document.getElementById("productPrice").value);
+      if (!budget_id || !product_name || !price) return alert("נא למלא את כל השדות הנדרשים.");
+
+      const { error: err1 } = await supabase.from("budget_purchases").insert([{ budget_id, product_name, store_name, price }]);
+      if (err1) return alert("שגיאה בהוספת קנייה");
+
+      // עדכון יתרת התקציב
+      const { data: b } = await supabase.from("budgets").select("remaining").eq("id", budget_id).single();
+      const newRemaining = (b.remaining - price).toFixed(2);
+      const { error: err2 } = await supabase.from("budgets").update({ remaining: newRemaining }).eq("id", budget_id);
+      if (err2) return alert("שגיאה בעדכון תקציב");
+
+      alert("✅ קנייה נוספה והתקציב עודכן!");
+      await loadBudgets();
+    });
+
+    loadBudgets();
+  </script>
+</body>
+</html>

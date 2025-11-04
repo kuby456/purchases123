@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>מערכת כלכלית חכמה</title>
+  <style>
+ /* ─────────────────────────────
+   🎨 סגנון כללי
+───────────────────────────── */
+body {
+  margin: 0;
+  font-family: "Heebo", sans-serif;
+  background: linear-gradient(135deg, #f3f6fb, #eef2ff);
+  color: #1e293b;
+  overflow-x: hidden;
+  transition: margin-right 0.3s ease;
+}
+
+/* ─────────────────────────────
+   סרגל עליון
+───────────────────────────── */
+header {
+  position: relative;
+  top: 0;
+  right: 0;
+  left: 0;
+  min-height: 80px;
+  background: #ffffff;
+  border-bottom: 1px solid #cbccce;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  z-index: 10;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+#menuBtn {
+  font-size: 26px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #1e293b;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+#menuBtn:hover {
+  color: #2563eb;
+  transform: scale(1.1);
+}
+
+/* ─────────────────────────────
+   כותרת עליונה
+───────────────────────────── */
+.fgf {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0 auto;
+  background: rgba(226, 232, 255, 0.8);
+  padding: 8px 16px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* ─────────────────────────────
+   תוכן הדף
+───────────────────────────── */
+main {
+  padding: 80px 20px;
+  transition: margin-right 0.3s ease;
+}
+
+/* ─────────────────────────────
+   סרגל צד
+───────────────────────────── */
+#sidebar {
+  position: fixed;
+  top: 0;
+  right: -260px;
+  width: 260px;
+  height: 100dvh;
+  background: #ffffff;
+  box-shadow: -3px 0 12px rgba(0,0,0,0.15);
+  border-left: 1px solid #e5e7eb;
+  transition: right 0.4s ease, opacity 0.4s ease;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  padding: 30px 20px;
+}
+
+#sidebar.open {
+  right: 0;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.sidebar-open main {
+  margin-right: 260px;
+  transition: margin-right 0.4s ease-in-out;
+}
+
+#sidebar h1 {
+  text-align: center;
+  font-size: 1.4rem;
+  color: #2563eb;
+  margin-bottom: 20px;
+}
+
+#sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#sidebar li {
+  margin: 12px 0;
+  font-weight: 500;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+
+#sidebar li:hover {
+  background: #e0ecff;
+  color: #1e40af;
+}
+
+li.active {
+  background: #dbeafe;
+  color: #2563eb;
+  font-weight: bold;
+}
+
+/* ─────────────────────────────
+   כפתור חץ בסרגל צד
+───────────────────────────── */
+.giop1 {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 45px;
+  height: 60px;
+  background: #2563eb;
+  border: none;
+  border-right: 3px solid #e5e7eb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 0 6px 6px 0;
+  transition: background 0.3s ease;
+}
+
+.giop1:hover {
+  background: #1d4ed8;
+}
+
+.giop-icon {
+  width: 28px;
+  height: auto;
+  filter: brightness(0) invert(1);
+  transition: transform 0.3s ease;
+}
+
+.giop1:hover .giop-icon {
+  transform: scale(1.15);
+}
+
+/* ─────────────────────────────
+   תיבת תקציב מרכזית
+───────────────────────────── */
+#budgetContainer {
+  text-align: center;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  margin: 40px auto;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease;
+}
+
+#budgetContainer:hover {
+  transform: translateY(-2px);
+}
+
+#budgetContainer h3 {
+  margin-bottom: 12px;
+  color: #1e40af;
+}
+
+#budgetContainer p {
+  font-size: 1.1rem;
+  margin: 6px 0;
+}
+
+#refreshBtn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+#refreshBtn:hover {
+  background: #1d4ed8;
+  transform: scale(1.05);
+}
+
+/* ─────────────────────────────
+   כפתור סריקה צף
+───────────────────────────── */
+.scan-wrapper {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+  text-align: center;
+}
+
+.scan-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 6px;
+}
+
+.ghghg1 {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 50%;
+  border: 2px solid #2563eb;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.ghghg1:hover {
+  transform: scale(1.08);
+  background: #eff6ff;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+}
+
+.scan-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* ─────────────────────────────
+   רספונסיביות
+───────────────────────────── */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+
+  #sidebar {
+    width: 220px;
+  }
+
+  body.sidebar-open main {
+    margin-right: 220px;
+  }
+
+  .fgf {
+    width: 90%;
+    font-size: 1rem;
+  }
+
+  #budgetContainer {
+    width: 95%;
+  }
+}
+
+@media (max-width: 480px) {
+  #menuBtn {
+    font-size: 20px;
+  }
+
+  .fgf {
+    font-size: 0.95rem;
+    padding: 6px 10px;
+  }
+
+  #refreshBtn {
+    font-size: 0.9rem;
+  }
+
+  .scan-wrapper {
+    bottom: 18px;
+    left: 18px;
+  }
+
+  .ghghg1 {
+    width: 52px;
+    height: 52px;
+  }
+
+  .scan-icon {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <header>
+
+ <div class="top-bar">
+    <button id="menuBtn">☰</button>
+        <h2 class="fgf">המערכת הכלכלית שלי</h2>
+
+    </div>
+
+
+
+</header>
+
+  <aside id="sidebar">
+
+    <button class="giop1">
+  <img src="images/fast-forward.png" alt="חץ" class="giop-icon">
+</button>
+
+    <h1>תפריט</h1>
+ <ul>
+  <li onclick="window.location.href='index.html'">🏠 דף ראשי</li>
+  <li onclick="window.location.href='purchases.html'">🧾 רשימת קניות</li>
+  <li onclick="window.location.href='add-purchase.html'">➕ הוספת קנייה</li>
+  <li onclick="window.location.href='ocr.html'">📷 סרוק קבלה</li>
+  <li onclick="window.location.href='settings.html'">⚙️ הגדרות תקציב</li>
+</ul>
+
+  </aside>
+
+<div class="scan-wrapper">
+  <span class="scan-label">סרוק קבלה</span>
+  <button onclick="window.location.href='ocr.html'" class="ghghg1" title="סרוק קבלה">
+    <!-- 🟦 SVG אייקון סריקה מובנה -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="scan-icon" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect>
+      <path d="M3 10h18"></path>
+      <path d="M8 2v4"></path>
+      <path d="M16 2v4"></path>
+      <path d="M8 18v4"></path>
+      <path d="M16 18v4"></path>
+    </svg>
+  </button>
+</div>
+
+<div id="budgetContainer" style="text-align:center; background:#fff; border-radius:10px; padding:15px; margin:20px auto; width:80%; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+  <h3>📊 סיכום תקציב חודשי</h3>
+  <p>תקציב כולל: <span id="budget">0 ₪</span></p>
+  <p>הוצאות עד כה: <span id="spent">0 ₪</span></p>
+  <p>נותר: <span id="remaining">0 ₪</span></p>
+  <button id="refreshBtn">🔄 רענן נתונים</button>
+</div>
+
+  <script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+// ✅ Supabase שלך
+const supabaseUrl = "https://tgfqsmarvznpzwdixvye.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnZnFzbWFydnpucHp3ZGl4dnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3OTM1NzEsImV4cCI6MjA3NjM2OTU3MX0.ui5rHWh8KgSmhYrl_unozb9rwAaZQeTNEeMZF63lhYM";
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const budgetEl = document.getElementById("budget");
+const spentEl = document.getElementById("spent");
+const remainingEl = document.getElementById("remaining");
+const refreshBtn = document.getElementById("refreshBtn");
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+const linkBar = document.querySelector(".link-bar");
+const closeBtn = document.querySelector(".giop1");
+
+async function loadBudgetData() {
+  // תקציב שהוגדר
+  const { data: settings } = await supabase.from("settings").select("*").limit(1);
+  const totalBudget = settings?.[0]?.monthly_budget || 0;
+
+  // סכום הוצאות מסך כל הקניות
+  const { data: purchases } = await supabase.from("purchases").select("price");
+  const totalSpent = purchases?.reduce((sum, p) => sum + (p.price || 0), 0) || 0;
+
+  const remaining = totalBudget - totalSpent;
+
+  budgetEl.textContent = totalBudget.toFixed(2) + " ₪";
+  spentEl.textContent = totalSpent.toFixed(2) + " ₪";
+  remainingEl.textContent = remaining.toFixed(2) + " ₪";
+}
+
+refreshBtn.addEventListener("click", loadBudgetData);
+loadBudgetData();
+
+// 🧾 טעינת הסריקה האחרונה מ־Supabase
+async function loadData() {
+  const { data, error } = await supabase
+    .from("receipts")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  const area = document.getElementById("dataArea");
+  if (error) {
+    area.textContent = "❌ שגיאה בטעינת הנתונים";
+    console.error(error);
+  } else if (!data || data.length === 0) {
+    area.textContent = "אין עדיין סריקות.";
+  } else {
+    area.innerHTML = `
+      <h3>🧾 תוצאה אחרונה:</h3>
+      <pre>${data[0].text}</pre>
+    `;
+  }
+}
+
+loadData();
+
+// 🧭 תפעול Sidebar
+menuBtn.addEventListener("click", () => {
+  sidebar.classList.toggle("open");
+  document.body.classList.toggle("sidebar-open");
+});
+
+closeBtn.addEventListener("click", () => {
+  sidebar.classList.remove("open");
+  document.body.classList.remove("sidebar-open");
+});
+
+// סגירה בלחיצה מחוץ לסרגל
+document.addEventListener("click", (e) => {
+  if (
+    sidebar.classList.contains("open") &&
+    !sidebar.contains(e.target) &&
+    !menuBtn.contains(e.target)
+  ) {
+    sidebar.classList.remove("open");
+    document.body.classList.remove("sidebar-open");
+  }
+});
+
+// 🌐 גלילה אופקית של ה־link-bar
+let isDown = false;
+let startX;
+let scrollLeft;
+
+linkBar.addEventListener("mousedown", (e) => {
+  isDown = true;
+  startX = e.pageX - linkBar.offsetLeft;
+  scrollLeft = linkBar.scrollLeft;
+});
+
+linkBar.addEventListener("mouseleave", () => (isDown = false));
+linkBar.addEventListener("mouseup", () => (isDown = false));
+
+linkBar.addEventListener("mousemove", (e) => {
+  if (!isDown) return;
+  e.preventDefault();
+  const x = e.pageX - linkBar.offsetLeft;
+  const walk = (x - startX) * 1.5;
+  linkBar.scrollLeft = scrollLeft - walk;
+});
+
+// 🚫 ביטול גרירת לינקים
+linkBar.querySelectorAll("a").forEach((link) => {
+  link.addEventListener("dragstart", (e) => e.preventDefault());
+});
+
+document.querySelectorAll("#sidebar li").forEach(li => {
+  if (li.textContent.includes("דף ראשי") && window.location.href.includes("index.html"))
+    li.classList.add("active");
+});
+
+</script>
+
+</body>
+</html>
