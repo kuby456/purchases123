@@ -40,7 +40,7 @@
     transform: scale(1.05);
   }
   table {
-    margin: auto;
+    margin: 40px auto;
     width: 90%;
     max-width: 600px;
     border-collapse: collapse;
@@ -70,6 +70,28 @@
   a:hover {
     color: #1d4ed8;
   }
+
+  .back-link {
+  display: inline-block;
+  background: #2563eb;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 1rem;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: background 0.25s ease, transform 0.2s ease;
+  margin: 15px 0;
+}
+
+.back-link:hover {
+  background: #1d4ed8;
+  transform: scale(1.05);
+}
+
+.back-link:active {
+  transform: scale(0.97);
+}
 </style>
 </head>
 <body>
@@ -79,11 +101,11 @@
 
   <button id="refreshBtn">🔄 רענן</button>
 
+<a href="index.html" class="back-link">⬅ חזרה לדף הראשי</a>
   <table id="list">
     <tr><th>בית עסק</th><th>מוצר</th><th>מחיר</th><th>תאריך</th></tr>
   </table>
 
-  <a href="index.html">⬅ חזרה לדף הראשי</a>
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -112,7 +134,7 @@
         const date = new Date(item.created_at).toLocaleString("he-IL");
         tr.innerHTML = `
           <td>${item.store_name || "-"}</td>
-          <td>${item.product_name || "-"}</td>
+          <td>${item.name || "-"}</td>
           <td>${item.price ? item.price + " ₪" : "-"}</td>
           <td>${date}</td>
         `;
