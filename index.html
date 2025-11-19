@@ -265,6 +265,76 @@ li.active {
   object-fit: contain;
 }
 
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  padding: 10px 14px;
+}
+/* כפתור מידע בצד שמאל — לא צף! */
+#leftInfoBtn {
+  background: #25eb3556;
+  color: rgb(4, 0, 255);
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin-left: auto;        /* דוחף אותו לצד שמאל */
+  margin-right: 10px;       /* ריווח מהכותרת */
+  transition: 0.25s ease;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+   margin: -10px auto 20px;
+   position: relative;
+   left: -60px;
+   top: -20px;
+
+}
+
+#leftInfoBtn:hover {
+  background: #1d4ed8;
+  transform: scale(1.05);
+}
+
+#leftInfoBtn svg {
+  width: 22px;
+  height: 22px;
+  stroke: rgb(0, 60, 255);
+}
+
+@media (min-width: 769px) {
+ header {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+  #leftInfoBtn {
+  background: #25eb3556;
+  color: rgb(4, 0, 255);
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin-left: auto;        /* דוחף אותו לצד שמאל */
+  margin-right: 10px;       /* ריווח מהכותרת */
+  transition: 0.25s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.205);
+   margin: -10px auto 20px;
+   position: relative;
+   left: -85px;
+   top: -20px;
+
+}
+}
+
 /* ─────────────────────────────
    רספונסיביות
 ───────────────────────────── */
@@ -323,6 +393,51 @@ li.active {
   }
 }
 
+/* באנר מידע — מוסתר כברירת מחדל */
+#infoBanner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.85);
+  background: #ffffff;
+  padding: 22px;
+  border-radius: 14px;
+  width: 80%;
+  max-width: 380px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.25);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: 0.35s ease;
+  text-align: center;
+}
+
+/* כשהבאנר פתוח */
+#infoBanner.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* כפתור איקס */
+#infoCloseBtn {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 14px;
+  transition: 0.25s ease;
+}
+
+#infoCloseBtn:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+
+
   </style>
 </head>
 <body>
@@ -330,13 +445,50 @@ li.active {
 
  <div class="top-bar">
     <button id="menuBtn">☰</button>
-        <h2 class="fgf">המערכת הכלכלית שלי</h2>
+  <button id="leftInfoBtn">
+    <!-- אייקון מידע SVG -->
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 8.25v.008m0 3.742v4.25M12 3a9 9 0 110 18 9 9 0 010-18z"/>
+    </svg>
+  </button>        <h2 class="fgf">המערכת הכלכלית שלי</h2>
 
     </div>
 
 
 
 </header>
+<div id="infoBanner">
+  <h3>ℹ️ מידע על הדפים במערכת</h3>
+
+  <p style="text-align:right;direction:rtl;line-height:1.7;font-size:1rem;">
+    <b>🏠 דף ראשי (index):</b><br>
+    מציג את התקציב החודשי, הוצאות החודש, היתרה הנותרת ומחשב הכל אוטומטית. כולל Reset בתחילת חודש ותפריט צד.
+
+    <br><br>
+
+    <b>➕ הוספת קנייה:</b><br>
+    מאפשר להזין מוצר, מחיר ועסק. שומר הכל ל-Supabase ומציע שמות מוצרים/עסקים מהעבר בצורה מהירה.
+
+    <br><br>
+
+    <b>🧾 רשימת קניות:</b><br>
+    מציג את כל הקניות שבוצעו: מוצר, מחיר, בית עסק ותאריך. נטען מ-Supabase עם אפשרות רענון.
+
+    <br><br>
+
+    <b>📷 סרוק קבלה:</b><br>
+    מאפשר צילום/בחירת תמונה, מפענח טקסט בקבלה, מוצא מוצרים ומחירים ושומר אוטומטית ל-Supabase.
+
+    <br><br>
+
+    <b>⚙️ הגדרות תקציב:</b><br>
+    קביעת תקציב חודשי חדש. מחליף תקציב קודם בלי קשר למינוס/יתרה מהחודש הקודם.
+  </p>
+
+  <button id="infoCloseBtn">✖ סגור</button>
+</div>
+
 
   <aside id="sidebar">
 
@@ -394,15 +546,73 @@ const menuBtn = document.getElementById("menuBtn");
 const sidebar = document.getElementById("sidebar");
 const linkBar = document.querySelector(".link-bar");
 const closeBtn = document.querySelector(".giop1");
+const leftInfoBtn = document.getElementById("leftInfoBtn");
+const infoBanner = document.getElementById("infoBanner");
+const infoCloseBtn = document.getElementById("infoCloseBtn");
+
+
+leftInfoBtn.addEventListener("click", () => {
+  infoBanner.classList.add("show");
+});
+
+infoCloseBtn.addEventListener("click", () => {
+  infoBanner.classList.remove("show");
+});
+
+async function autoResetMonthlyBudget() {
+  const today = new Date();
+  const day = today.getDate();
+
+  // רק אם היום ה-1 בחודש
+  if (day !== 1) return;
+
+  // מביא את התקציב האחרון
+  const { data: settings } = await supabase
+    .from("settings")
+    .select("monthly_budget")
+    .limit(1);
+
+  if (!settings || settings.length === 0) return;
+
+  const lastBudget = settings[0].monthly_budget;
+
+  // מוחק את התקציב הישן
+  await supabase.from("settings").delete().neq("id", 0);
+
+  // יוצר תקציב חדש – אותו סכום בדיוק
+  await supabase.from("settings").insert([
+    { monthly_budget: lastBudget }
+  ]);
+}
 
 async function loadBudgetData() {
-  // תקציב שהוגדר
-  const { data: settings } = await supabase.from("settings").select("*").limit(1);
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = today.getMonth();
+
+  // טווח תחילת חודש
+  const monthStart = new Date(y, m, 1).toISOString();
+  const nextMonthStart = new Date(y, m + 1, 1).toISOString();
+
+  // מביא תקציב
+  const { data: settings } = await supabase
+    .from("settings")
+    .select("*")
+    .limit(1);
+
   const totalBudget = settings?.[0]?.monthly_budget || 0;
 
-  // סכום הוצאות מסך כל הקניות
-  const { data: purchases } = await supabase.from("purchases").select("price");
-  const totalSpent = purchases?.reduce((sum, p) => sum + (p.price || 0), 0) || 0;
+  // מביא רק הוצאות של החודש הנוכחי!!
+  const { data: purchases } = await supabase
+    .from("purchases")
+    .select("*")
+    .gte("created_at", monthStart)
+    .lt("created_at", nextMonthStart);
+
+  const totalSpent = purchases?.reduce(
+    (sum, p) => sum + (p.price || 0),
+    0
+  ) || 0;
 
   const remaining = totalBudget - totalSpent;
 
@@ -411,8 +621,13 @@ async function loadBudgetData() {
   remainingEl.textContent = remaining.toFixed(2) + " ₪";
 }
 
+
 refreshBtn.addEventListener("click", loadBudgetData);
-loadBudgetData();
+
+(async () => {
+  await autoResetMonthlyBudget();
+  await loadBudgetData();
+})();
 
 // 🧾 טעינת הסריקה האחרונה מ־Supabase
 async function loadData() {
