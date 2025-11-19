@@ -4,73 +4,56 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🛒 הוספת קנייה</title>
+
 <style>
+  #toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: #2563eb;
+  color: white;
+  padding: 16px 26px;
+  border-radius: 14px;
+  font-size: 1.2rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s, transform 0.3s;
+  z-index: 9999;
+}
+#toast.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
   body {
     font-family: "Heebo", sans-serif;
     background: linear-gradient(135deg, #f3f6fb, #eef2ff);
-    color: #1e293b;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-  }
-
-  header {
-    background: #ffffff;
-    padding: 14px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    position: sticky;
-    top: 0;
-  }
-
-  h2 {
-    margin: 0;
-    color: #1e3a8a;
-    font-weight: 700;
-  }
-
-  main {
-    margin-top: 60px;
     padding: 20px;
+    text-align: center;
   }
 
   form {
-    background: #ffffff;
+    background: #fff;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     width: 90%;
     max-width: 420px;
-    margin: 0 auto;
-    padding: 30px 20px;
-    border-radius: 14px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    text-align: center;
-  }
-
-  label {
-    display: block;
-    margin-top: 10px;
-    font-size: 1.05rem;
-    color: #1e3a8a;
-    font-weight: 600;
+    margin: auto;
   }
 
   input {
     width: 80%;
     padding: 10px;
-    margin-top: 8px;
+    margin: 8px 0;
     border-radius: 8px;
     border: 1px solid #cbd5e1;
-    text-align: center;
     font-size: 1rem;
-    transition: border 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
   }
 
   button {
-    margin-top: 20px;
     background: #2563eb;
     color: white;
     border: none;
@@ -78,83 +61,198 @@
     border-radius: 10px;
     cursor: pointer;
     font-size: 1rem;
-    transition: background 0.3s ease, transform 0.2s ease;
+    margin-top: 10px;
   }
 
-  button:hover {
-    background: #1d4ed8;
-    transform: scale(1.05);
-  }
-
-  a {
-    display: inline-block;
+  .categories {
     margin-top: 25px;
-    color: #2563eb;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease;
+    text-align: center;
   }
 
-  a:hover {
-    color: #1d4ed8;
+  .cat-box {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+    width: 90%;
+    max-width: 420px;
+    margin-inline: auto;
   }
 
-  footer {
-    margin-top: 50px;
-    color: #64748b;
-    font-size: 0.9rem;
+  .cat-box h3 {
+    margin-top: 0;
+    color: #1e3a8a;
   }
+
+  .line {
+  display: inline-block;
+  padding: 6px 12px;
+  margin: 6px;
+  border-radius: 12px;
+  border: 2px solid #086b05;
+  background: #0a38b8;
+  color: #ffffff;
+  font-weight: bolder;
+  font-size: 1rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.2s;
+}
+
+.line:hover {
+  background: #dbe8ff;
+  transform: scale(1.05);
+}
+
+#cat-products,
+#cat-prices,
+#cat-stores {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 </style>
 </head>
 
 <body>
-  <header>
-    <h2>🛒 הוספת קנייה חדשה</h2>
-  </header>
 
-  <main>
-    <form id="purchaseForm">
-      <label>שם מוצר:</label>
-      <input id="name" required placeholder="לדוגמה: חלב תנובה"><br><br>
+<h2>🛒 הוספת קנייה חדשה</h2>
 
-      <label>מחיר (₪):</label>
-      <input id="price" type="number" step="0.01" required placeholder="לדוגמה: 6.90"><br><br>
+<form id="purchaseForm">
+  <input id="store" placeholder="שם בית עסק" required>
+  <input id="product" placeholder="שם מוצר" required>
+  <input id="price" type="number" step="0.01" placeholder="מחיר (₪)" required>
 
-      <button type="submit">💾 שמור</button>
-    </form>
+  <button type="submit">💾 שמור</button>
 
-    <a href="index.html">⬅ חזרה לדף הראשי</a>
-  </main>
+  <!-- קטגוריות בתוך הקונטיינר -->
+  <div class="categories">
 
-  <footer>
-    © המערכת הכלכלית שלי
-  </footer>
+ <div class="cat-box">
+      <h3>🏪 שמות בתי עסק</h3>
+      <div id="cat-stores"></div>
+    </div>
 
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-    const supabase = createClient(
-      "https://tgfqsmarvznpzwdixvye.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnZnFzbWFydnpucHp3ZGl4dnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3OTM1NzEsImV4cCI6MjA3NjM2OTU3MX0.ui5rHWh8KgSmhYrl_unozb9rwAaZQeTNEeMZF63lhYM"
-    );
+    <div class="cat-box">
+      <h3>📌 שמות מוצרים</h3>
+      <div id="cat-products"></div>
+    </div>
 
-    document.getElementById("purchaseForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      const price = parseFloat(document.getElementById("price").value);
-      const date = new Date().toISOString();
+    <div class="cat-box">
+      <h3>💰 מחירים</h3>
+      <div id="cat-prices"></div>
+    </div>
 
-      const { error } = await supabase.from("purchases").insert([
-        { product_name: name, price, created_at: date }
-      ]);
 
-      if (error) {
-        console.error(error);
-        alert("❌ שגיאה בשמירה!");
-      } else {
-        alert("✅ הקנייה נשמרה בהצלחה!");
-        window.location.href = "index.html";
-      }
+  </div>
+</form>
+<div id="toast">💾 נשמר בהצלחה!</div>
+
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  const supabase = createClient(
+    "https://tgfqsmarvznpzwdixvye.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnZnFzbWFydnpucHp3ZGl4dnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3OTM1NzEsImV4cCI6MjA3NjM2OTU3MX0.ui5rHWh8KgSmhYrl_unozb9rwAaZQeTNEeMZF63lhYM"
+  );
+
+  const form = document.getElementById("purchaseForm");
+
+  const catProducts = document.getElementById("cat-products");
+  const catPrices   = document.getElementById("cat-prices");
+  const catStores   = document.getElementById("cat-stores");
+
+  function loadLocalCategories() {
+    const products = JSON.parse(localStorage.getItem("cat_products") || "[]");
+    const prices   = JSON.parse(localStorage.getItem("cat_prices") || "[]");
+    const stores   = JSON.parse(localStorage.getItem("cat_stores") || "[]");
+
+    catProducts.innerHTML = "";
+    products.forEach(p => addItemToBox(catProducts, p, "product"));
+
+    catPrices.innerHTML = "";
+    prices.forEach(p => addItemToBox(catPrices, p, "price"));
+
+    catStores.innerHTML = "";
+    stores.forEach(s => addItemToBox(catStores, s, "store"));
+  }
+
+  function addItemToBox(box, text, type) {
+    const div = document.createElement("div");
+    div.className = "line";
+    div.textContent = text;
+
+    div.addEventListener("click", () => {
+      if (type === "product") document.getElementById("product").value = text;
+      if (type === "price") document.getElementById("price").value = text.replace(" ₪","");
+      if (type === "store") document.getElementById("store").value = text;
     });
-  </script>
+
+    box.appendChild(div);
+  }
+
+  function saveToLocal(category, value) {
+    const key = "cat_" + category;
+    const arr = JSON.parse(localStorage.getItem(key) || "[]");
+
+    if (!arr.includes(value)) {
+      arr.push(value);
+      localStorage.setItem(key, JSON.stringify(arr));
+    }
+  }
+
+  function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2000); // נעלם אחרי 2 שניות
+}
+
+
+  // 🟦 שמירה ל־Supabase + localStorage + מילוי קטגוריות
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const store   = document.getElementById("store").value.trim();
+    const product = document.getElementById("product").value.trim();
+    const price   = document.getElementById("price").value.trim();
+    const date    = new Date().toISOString();
+
+    const { error } = await supabase.from("purchases").insert([
+      {
+        name: product,          // ← השדה הנכון מהטבלה שלך
+        store_name: store,
+        price,
+        created_at: date
+      }
+    ]);
+
+    if (error) {
+      alert("❌ שגיאה בשמירה!");
+      console.error(error);
+      return;
+    }
+
+    // שמירה ב־LocalStorage
+    saveToLocal("products", product);
+    saveToLocal("prices", price + " ₪");
+    saveToLocal("stores", store);
+
+    // עדכון קטגוריות
+    loadLocalCategories();
+
+    form.reset();
+
+showToast("✅ נשמר בהצלחה!");
+  });
+
+  loadLocalCategories();
+</script>
+
 </body>
 </html>
